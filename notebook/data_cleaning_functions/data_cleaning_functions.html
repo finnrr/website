@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+    <title>Data Cleaning Functions</title>
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="../../theme/css/main.css" type="text/css" />
+    <div class="container">
+    <h1><a href="../../notebook.html">Finn's Notebook</a></h1>
+    </div>
+</head>
+<body>
+    <div class="container">
+<div class="row">
+    <div class="col-md-8">
+    <h3>Data Cleaning Functions</h3>
+    <label></label>
+    <details><summary>Imports and settings</summary>
+
+<div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">from</span> <span class="nn">sklearn.impute</span> <span class="kn">import</span> <span class="n">SimpleImputer</span>
+<span class="kn">from</span> <span class="nn">word2number</span> <span class="kn">import</span> <span class="n">w2n</span>
+</pre></div>
+
+
+
+</details>
+
+<details><summary>Preamble</summary>
+
+The easiest gains in time efficiency, for a Data Scientist, is the area of data cleaning. Investing a little time into building functions will save in the long run. Importing 10,000 csv's with 10,000 columns shouldn't result in the loss of 10,000 hairs.
+
+Top priority should be reworking all data collection methods to be compatible with your algorithms. Every situation will require thought and until general AI arrives, there is no silver bullet.
+
+</details>
+
+<div class="highlight"><pre><span></span><span class="c1">#Sample data</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s1">&#39;year&#39;</span><span class="p">:[</span><span class="mi">2010</span><span class="p">,</span><span class="mi">2015</span><span class="p">,</span><span class="mi">2020</span><span class="p">,</span><span class="mi">2025</span><span class="p">],</span><span class="s1">&#39;count_1&#39;</span><span class="p">:[</span><span class="mi">1</span><span class="p">,</span><span class="s1">&#39;*&#39;</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">9</span><span class="p">],</span><span class="s1">&#39;count_2&#39;</span><span class="p">:[</span><span class="mi">1</span><span class="p">,</span><span class="s1">&#39;s&#39;</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">2</span><span class="p">],</span><span class="s1">&#39;count_3&#39;</span><span class="p">:[</span><span class="mf">1e-20</span><span class="p">,</span><span class="s1">&#39;three&#39;</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="s1">&#39;two&#39;</span><span class="p">],</span><span class="s1">&#39;count_4&#39;</span><span class="p">:[</span><span class="s1">&#39;5.8&#39;</span><span class="p">,</span><span class="mi">6</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span><span class="mi">5</span><span class="p">],</span><span class="s1">&#39;count_5&#39;</span><span class="p">:[</span><span class="mf">4.1</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="kc">False</span><span class="p">,</span><span class="mi">4</span><span class="p">],</span><span class="s1">&#39;count_6&#39;</span><span class="p">:[</span><span class="mi">5</span><span class="p">,</span><span class="mi">6</span><span class="p">,</span><span class="mi">7</span><span class="p">,</span><span class="s1">&#39;fifty&#39;</span><span class="p">]})</span>
+<span class="n">df</span>
+</pre></div>
+
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>year</th>
+      <th>count_1</th>
+      <th>count_2</th>
+      <th>count_3</th>
+      <th>count_4</th>
+      <th>count_5</th>
+      <th>count_6</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>0</td>
+      <td>2010</td>
+      <td>1</td>
+      <td>1</td>
+      <td>1e-20</td>
+      <td>5.8</td>
+      <td>4.1</td>
+      <td>5</td>
+    </tr>
+    <tr>
+      <td>1</td>
+      <td>2015</td>
+      <td>*</td>
+      <td>s</td>
+      <td>three</td>
+      <td>6</td>
+      <td>4</td>
+      <td>6</td>
+    </tr>
+    <tr>
+      <td>2</td>
+      <td>2020</td>
+      <td>3</td>
+      <td>3</td>
+      <td>3</td>
+      <td>NaN</td>
+      <td>False</td>
+      <td>7</td>
+    </tr>
+    <tr>
+      <td>3</td>
+      <td>2025</td>
+      <td>9</td>
+      <td>2</td>
+      <td>two</td>
+      <td>5</td>
+      <td>4</td>
+      <td>fifty</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<p>Using numpy's to_numeric we can force all values to numeric.</p>
+<div class="highlight"><pre><span></span><span class="c1">#pandas to numeric</span>
+<span class="k">def</span> <span class="nf">to_num</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_numeric</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">errors</span><span class="o">=</span><span class="s1">&#39;coerce&#39;</span><span class="p">)</span>
+<span class="n">df_1</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">applymap</span><span class="p">(</span><span class="n">to_num</span><span class="p">)</span>
+<span class="n">df_1</span>
+</pre></div>
+
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>year</th>
+      <th>count_1</th>
+      <th>count_2</th>
+      <th>count_3</th>
+      <th>count_4</th>
+      <th>count_5</th>
+      <th>count_6</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>0</td>
+      <td>2010</td>
+      <td>1.0</td>
+      <td>1.0</td>
+      <td>1.000000e-20</td>
+      <td>5.8</td>
+      <td>4.1</td>
+      <td>5.0</td>
+    </tr>
+    <tr>
+      <td>1</td>
+      <td>2015</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>6.0</td>
+      <td>4</td>
+      <td>6.0</td>
+    </tr>
+    <tr>
+      <td>2</td>
+      <td>2020</td>
+      <td>3.0</td>
+      <td>3.0</td>
+      <td>3.000000e+00</td>
+      <td>NaN</td>
+      <td>False</td>
+      <td>7.0</td>
+    </tr>
+    <tr>
+      <td>3</td>
+      <td>2025</td>
+      <td>9.0</td>
+      <td>2.0</td>
+      <td>NaN</td>
+      <td>5.0</td>
+      <td>4</td>
+      <td>NaN</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<p>Using sklearns SimpleImputer, you can fill missing values with the mean of each column.</p>
+<div class="highlight"><pre><span></span><span class="c1">#impute missing values</span>
+<span class="k">def</span> <span class="nf">impute_num</span><span class="p">(</span><span class="n">df</span><span class="p">):</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">SimpleImputer</span><span class="p">(</span><span class="n">missing_values</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span> <span class="n">strategy</span><span class="o">=</span><span class="s1">&#39;mean&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">df</span><span class="p">))</span>
+    <span class="n">z</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">df</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">z</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span>
+<span class="n">df_2</span> <span class="o">=</span> <span class="n">impute_num</span><span class="p">(</span><span class="n">df_1</span><span class="p">)</span>
+<span class="n">df_2</span>
+</pre></div>
+
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>year</th>
+      <th>count_1</th>
+      <th>count_2</th>
+      <th>count_3</th>
+      <th>count_4</th>
+      <th>count_5</th>
+      <th>count_6</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>0</td>
+      <td>2010.0</td>
+      <td>1.000000</td>
+      <td>1.0</td>
+      <td>1.000000e-20</td>
+      <td>5.8</td>
+      <td>4.1</td>
+      <td>5.0</td>
+    </tr>
+    <tr>
+      <td>1</td>
+      <td>2015.0</td>
+      <td>4.333333</td>
+      <td>2.0</td>
+      <td>1.500000e+00</td>
+      <td>6.0</td>
+      <td>4.0</td>
+      <td>6.0</td>
+    </tr>
+    <tr>
+      <td>2</td>
+      <td>2020.0</td>
+      <td>3.000000</td>
+      <td>3.0</td>
+      <td>3.000000e+00</td>
+      <td>5.6</td>
+      <td>0.0</td>
+      <td>7.0</td>
+    </tr>
+    <tr>
+      <td>3</td>
+      <td>2025.0</td>
+      <td>9.000000</td>
+      <td>2.0</td>
+      <td>1.500000e+00</td>
+      <td>5.0</td>
+      <td>4.0</td>
+      <td>6.0</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<p>Turn string words to numbers throught the word2number package. (Theres also a num2word package)</p>
+<div class="highlight"><pre><span></span><span class="c1">#words to numbers</span>
+<span class="k">def</span> <span class="nf">s2n</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="p">(</span><span class="nb">str</span><span class="p">)):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">w2n</span><span class="o">.</span><span class="n">word_to_num</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> 
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">value</span> 
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">value</span>        
+<span class="n">df_3</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">applymap</span><span class="p">(</span><span class="n">s2n</span><span class="p">)</span>
+<span class="n">df_3</span>
+</pre></div>
+
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>year</th>
+      <th>count_1</th>
+      <th>count_2</th>
+      <th>count_3</th>
+      <th>count_4</th>
+      <th>count_5</th>
+      <th>count_6</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>0</td>
+      <td>2010</td>
+      <td>1</td>
+      <td>1</td>
+      <td>1.000000e-20</td>
+      <td>5.8</td>
+      <td>4.1</td>
+      <td>5</td>
+    </tr>
+    <tr>
+      <td>1</td>
+      <td>2015</td>
+      <td>*</td>
+      <td>s</td>
+      <td>3.000000e+00</td>
+      <td>6</td>
+      <td>4</td>
+      <td>6</td>
+    </tr>
+    <tr>
+      <td>2</td>
+      <td>2020</td>
+      <td>3</td>
+      <td>3</td>
+      <td>3.000000e+00</td>
+      <td>NaN</td>
+      <td>False</td>
+      <td>7</td>
+    </tr>
+    <tr>
+      <td>3</td>
+      <td>2025</td>
+      <td>9</td>
+      <td>2</td>
+      <td>2.000000e+00</td>
+      <td>5</td>
+      <td>4</td>
+      <td>50</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<p>Turn Bools to NaN's. (If the column is all bools then better to translate as 0's and 1's)</p>
+<div class="highlight"><pre><span></span><span class="c1">#bool to nan</span>
+<span class="k">def</span> <span class="nf">bool_to_nan</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,(</span><span class="nb">bool</span><span class="p">)):</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">value</span>    
+<span class="n">df</span><span class="o">.</span><span class="n">applymap</span><span class="p">(</span><span class="n">bool_to_nan</span><span class="p">)</span>        
+</pre></div>
+
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>year</th>
+      <th>count_1</th>
+      <th>count_2</th>
+      <th>count_3</th>
+      <th>count_4</th>
+      <th>count_5</th>
+      <th>count_6</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>0</td>
+      <td>2010</td>
+      <td>1</td>
+      <td>1</td>
+      <td>1e-20</td>
+      <td>5.8</td>
+      <td>4.1</td>
+      <td>5</td>
+    </tr>
+    <tr>
+      <td>1</td>
+      <td>2015</td>
+      <td>*</td>
+      <td>s</td>
+      <td>three</td>
+      <td>6</td>
+      <td>4.0</td>
+      <td>6</td>
+    </tr>
+    <tr>
+      <td>2</td>
+      <td>2020</td>
+      <td>3</td>
+      <td>3</td>
+      <td>3</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>7</td>
+    </tr>
+    <tr>
+      <td>3</td>
+      <td>2025</td>
+      <td>9</td>
+      <td>2</td>
+      <td>two</td>
+      <td>5</td>
+      <td>4.0</td>
+      <td>fifty</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<p>Chain functions together:</p>
+<div class="highlight"><pre><span></span><span class="c1">#bool to nan then string to number then all values numeric then impute values</span>
+<span class="n">impute_num</span><span class="p">((</span><span class="n">df</span><span class="o">.</span><span class="n">applymap</span><span class="p">(</span><span class="n">bool_to_nan</span><span class="p">)</span><span class="o">.</span><span class="n">applymap</span><span class="p">(</span><span class="n">s2n</span><span class="p">)</span><span class="o">.</span><span class="n">applymap</span><span class="p">(</span><span class="n">to_num</span><span class="p">)))</span>
+</pre></div>
+
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>year</th>
+      <th>count_1</th>
+      <th>count_2</th>
+      <th>count_3</th>
+      <th>count_4</th>
+      <th>count_5</th>
+      <th>count_6</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>0</td>
+      <td>2010.0</td>
+      <td>1.000000</td>
+      <td>1.0</td>
+      <td>1.000000e-20</td>
+      <td>5.8</td>
+      <td>4.100000</td>
+      <td>5.0</td>
+    </tr>
+    <tr>
+      <td>1</td>
+      <td>2015.0</td>
+      <td>4.333333</td>
+      <td>2.0</td>
+      <td>3.000000e+00</td>
+      <td>6.0</td>
+      <td>4.000000</td>
+      <td>6.0</td>
+    </tr>
+    <tr>
+      <td>2</td>
+      <td>2020.0</td>
+      <td>3.000000</td>
+      <td>3.0</td>
+      <td>3.000000e+00</td>
+      <td>5.6</td>
+      <td>4.033333</td>
+      <td>7.0</td>
+    </tr>
+    <tr>
+      <td>3</td>
+      <td>2025.0</td>
+      <td>9.000000</td>
+      <td>2.0</td>
+      <td>2.000000e+00</td>
+      <td>5.0</td>
+      <td>4.000000</td>
+      <td>50.0</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<p>Check dtypes are numeric for feeding to sklearn:</p>
+<div class="highlight"><pre><span></span><span class="c1">#check dtypes</span>
+<span class="n">impute_num</span><span class="p">((</span><span class="n">df</span><span class="o">.</span><span class="n">applymap</span><span class="p">(</span><span class="n">bool_to_nan</span><span class="p">)</span><span class="o">.</span><span class="n">applymap</span><span class="p">(</span><span class="n">s2n</span><span class="p">)</span><span class="o">.</span><span class="n">applymap</span><span class="p">(</span><span class="n">to_num</span><span class="p">)))</span><span class="o">.</span><span class="n">dtypes</span>
+</pre></div>
+
+
+<div class="highlight"><pre><span></span><span class="err">year       float64</span>
+<span class="err">count_1    float64</span>
+<span class="err">count_2    float64</span>
+<span class="err">count_3    float64</span>
+<span class="err">count_4    float64</span>
+<span class="err">count_5    float64</span>
+<span class="err">count_6    float64</span>
+<span class="c">dtype: object</span>
+</pre></div>
+
+
+<p>Drop columns with inaccurate values:</p>
+<div class="highlight"><pre><span></span><span class="c1">#drop columns</span>
+<span class="n">impute_num</span><span class="p">((</span><span class="n">df</span><span class="o">.</span><span class="n">applymap</span><span class="p">(</span><span class="n">bool_to_nan</span><span class="p">)</span><span class="o">.</span><span class="n">applymap</span><span class="p">(</span><span class="n">s2n</span><span class="p">)</span><span class="o">.</span><span class="n">applymap</span><span class="p">(</span><span class="n">to_num</span><span class="p">))</span><span class="o">.</span><span class="n">dropna</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span>
+</pre></div>
+
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>year</th>
+      <th>count_3</th>
+      <th>count_6</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>0</td>
+      <td>2010.0</td>
+      <td>1.000000e-20</td>
+      <td>5.0</td>
+    </tr>
+    <tr>
+      <td>1</td>
+      <td>2015.0</td>
+      <td>3.000000e+00</td>
+      <td>6.0</td>
+    </tr>
+    <tr>
+      <td>2</td>
+      <td>2020.0</td>
+      <td>3.000000e+00</td>
+      <td>7.0</td>
+    </tr>
+    <tr>
+      <td>3</td>
+      <td>2025.0</td>
+      <td>2.000000e+00</td>
+      <td>50.0</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<p>Drop rows with inaccurate values:</p>
+<div class="highlight"><pre><span></span><span class="c1">#drop rows</span>
+<span class="n">impute_num</span><span class="p">((</span><span class="n">df</span><span class="o">.</span><span class="n">applymap</span><span class="p">(</span><span class="n">bool_to_nan</span><span class="p">)</span><span class="o">.</span><span class="n">applymap</span><span class="p">(</span><span class="n">s2n</span><span class="p">)</span><span class="o">.</span><span class="n">applymap</span><span class="p">(</span><span class="n">to_num</span><span class="p">))</span><span class="o">.</span><span class="n">dropna</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
+</pre></div>
+
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>year</th>
+      <th>count_1</th>
+      <th>count_2</th>
+      <th>count_3</th>
+      <th>count_4</th>
+      <th>count_5</th>
+      <th>count_6</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>0</td>
+      <td>2010.0</td>
+      <td>1.0</td>
+      <td>1.0</td>
+      <td>1.000000e-20</td>
+      <td>5.8</td>
+      <td>4.1</td>
+      <td>5.0</td>
+    </tr>
+    <tr>
+      <td>1</td>
+      <td>2025.0</td>
+      <td>9.0</td>
+      <td>2.0</td>
+      <td>2.000000e+00</td>
+      <td>5.0</td>
+      <td>4.0</td>
+      <td>50.0</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<p>Create custom search functions to return positions of funky values.</p>
+<div class="highlight"><pre><span></span><span class="c1">#value finder</span>
+<span class="k">def</span> <span class="nf">value_find</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">find</span><span class="p">):</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">values</span> <span class="o">==</span> <span class="n">find</span><span class="p">)))</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">result</span><span class="p">:</span> 
+            <span class="n">col</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">[</span><span class="n">i</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span> 
+            <span class="n">row</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="n">i</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span> 
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{find}</span><span class="s1"> at column: </span><span class="si">{col}</span><span class="s1"> row: </span><span class="si">{row}</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="k">pass</span>    
+<span class="n">value_find</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="s1">&#39;*&#39;</span><span class="p">)</span>
+</pre></div>
+
+
+<div class="highlight"><pre><span></span><span class="err">* at column: count_1 row: 1</span>
+</pre></div>
+
+
+<p>Leverage pre-built packages:</p>
+<p>ftfy: URL: https://github.com/LuminosoInsight/python-ftfy<br>
+Fixes Unicode strings that have been decoded wrong (URL's as %20 instead of space)</p>
+<p>Beautifier: URL: https://github.com/labtocat/beautifier<br>
+Splits Emails and URL's into copenent parts.</p>
+<p>Regular expression operations: Docs: https://docs.python.org/3/library/re.html<br>
+Great for sorting/editing specific strings, Practice at: https://regexr.com/</p>
+    </div>
+</div>
+    </div>
+</body>
+</html>

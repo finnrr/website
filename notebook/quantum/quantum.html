@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+    <title>Going quantum, using QuTip to translate quantum states</title>
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="../../theme/css/main.css" type="text/css" />
+    <div class="container">
+    <h1><a href="../../notebook.html">Finn's Notebook</a></h1>
+    </div>
+</head>
+<body>
+    <div class="container">
+<div class="row">
+    <div class="col-md-8">
+    <h3>Going quantum, using QuTip to translate quantum states</h3>
+    <label></label>
+    <p>Last October, Google released a <a href="https://ai.googleblog.com/2019/10/quantum-supremacy-using-programmable.html">statement</a> that they have achieved quantum supremacy, supremacy simply meaning a calculation performed on a quantum chip outperforming a classical linear chip. <a href="https://www.ibm.com/blogs/research/2019/10/on-quantum-supremacy/">IBM</a> responded with their skepticism and on the far side of the dubious graph <a href="https://gilkalai.wordpress.com/2019/09/23/quantum-computers-amazing-progress-google-ibm-and-extraordinary-but-probably-false-supremacy-claims-google/">some researchers</a> believe quantum computing impossible, as the circuit grows in size so does the noise.</p>
+<p><img alt="png" src="quantum_files/quantum_1.png"></p>
+<p>When you start dealing with quantum properties you stop thinking in objects and start thinking of probabilities, like a wave in the ocean. With the electromagnetism there are electric waves along one axis and magnetic waves on another at 90 degrees, this is what they mean by superposition, that the wave is in two places at once. When you measure this wave you only get one measurement, thus ‘collapsing’ the wave, note: measurement does not change the wave. Like hearing a musical chord with two simple notes your ear reads a combined wave and has squished these waves into a new sound, your ear does not change the source of these notes. We can reverse out the original waves with a <a href="https://www.youtube.com/watch?v=spUNpyF58BY">fourier transform</a>. </p>
+<p><img alt="png" src="quantum_files/quantum_2.png"></p>
+<p>So translating these probabilities onto the page we need to preserve dimensionality, thus enter <a href="https://pypi.org/project/qutip/">QuTip</a>. A python package that better preserves the positions of the waves in multidimensional space, streamline the matrix multiplication and report on <a href="https://en.wikipedia.org/wiki/Hamiltonian_(quantum_mechanics)">Hamiltonian</a> states. It also has the ability to represent quantum circuits, qubits and chaining them together with gates. </p>
+<div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">qutip</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">scipy</span> <span class="k">as</span> <span class="nn">scp</span>
+</pre></div>
+
+
+<p>Let’s create our first 2 quantum objects, 2 Fock states in Hilbert space, first and second state:</p>
+<div class="highlight"><pre><span></span><span class="n">state_1</span> <span class="o">=</span> <span class="n">basis</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">state_2</span> <span class="o">=</span> <span class="n">basis</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+</pre></div>
+
+
+<div class="highlight"><pre><span></span><span class="n">state_1</span>
+</pre></div>
+
+
+<p><img alt="png" src="quantum_files/latex_1.png"></p>
+<div class="highlight"><pre><span></span><span class="n">state_2</span>
+</pre></div>
+
+
+<p><img alt="png" src="quantum_files/latex_2.png"></p>
+<p>With these states initialized we can interact between them.</p>
+<div class="highlight"><pre><span></span><span class="n">state_1</span> <span class="o">-</span> <span class="n">state_2</span>
+</pre></div>
+
+
+<p><img alt="png" src="quantum_files/latex_3.png"></p>
+<div class="highlight"><pre><span></span><span class="n">state_1</span> <span class="o">+</span> <span class="n">state_2</span>
+</pre></div>
+
+
+<p><img alt="png" src="quantum_files/latex_4.png"></p>
+<p>With the dagger method .dag() we can convert ket |state_1&gt; into bra &lt;state_1| </p>
+<div class="highlight"><pre><span></span><span class="n">state_1</span><span class="o">.</span><span class="n">dag</span><span class="p">()</span>
+</pre></div>
+
+
+<p><img alt="png" src="quantum_files/latex_5.png"></p>
+<p>and combining provides useful:</p>
+<div class="highlight"><pre><span></span><span class="n">state_1</span> <span class="o">*</span> <span class="n">state_1</span><span class="o">.</span><span class="n">dag</span><span class="p">()</span>
+</pre></div>
+
+
+<p><img alt="png" src="quantum_files/latex_6.png"></p>
+<p>Sigma x,y,z gives us projection operators (spin 1/2) in a Pauli matrix:</p>
+<div class="highlight"><pre><span></span><span class="n">Sx</span> <span class="o">=</span> <span class="mi">1</span><span class="o">/</span><span class="mf">2.0</span><span class="o">*</span><span class="n">sigmax</span><span class="p">()</span>
+<span class="n">Sx</span>
+</pre></div>
+
+
+<p><img alt="png" src="quantum_files/latex_7.png"></p>
+<div class="highlight"><pre><span></span><span class="n">Sy</span> <span class="o">=</span> <span class="mi">1</span><span class="o">/</span><span class="mf">2.0</span><span class="o">*</span><span class="n">sigmay</span><span class="p">()</span>
+<span class="n">Sy</span>
+</pre></div>
+
+
+<p><img alt="png" src="quantum_files/latex_8.png"></p>
+<div class="highlight"><pre><span></span><span class="n">Sz</span> <span class="o">=</span> <span class="mi">1</span><span class="o">/</span><span class="mf">2.0</span><span class="o">*</span><span class="n">sigmaz</span><span class="p">()</span>
+<span class="n">Sz</span>
+</pre></div>
+
+
+<p><img alt="png" src="quantum_files/latex_9.png"></p>
+<p>With the sesolve() function we can solve the Schrodinger equation evolution of a state vector or unitary matrix for a given Hamiltonian. Basically estimate position over time.</p>
+<div class="highlight"><pre><span></span><span class="n">omega</span> <span class="o">=</span> <span class="mi">3</span>
+<span class="n">Hz</span> <span class="o">=</span> <span class="o">-</span><span class="n">omega</span><span class="o">*</span><span class="n">Sz</span>
+<span class="n">t</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">4</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="n">omega</span><span class="p">,</span><span class="mf">0.05</span><span class="p">)</span>
+<span class="n">expect_ops</span> <span class="o">=</span> <span class="p">[</span><span class="n">Sx</span><span class="p">,</span><span class="n">Sy</span><span class="p">,</span><span class="n">Sz</span><span class="p">]</span>
+<span class="n">psi0</span> <span class="o">=</span> <span class="mi">1</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">state_1</span> <span class="o">+</span> <span class="n">state_2</span><span class="p">)</span>
+<span class="n">result</span> <span class="o">=</span> <span class="n">sesolve</span><span class="p">(</span><span class="n">Hz</span><span class="p">,</span> <span class="n">psi0</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">expect_ops</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">t</span><span class="o">*</span><span class="n">omega</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">,</span> <span class="n">result</span><span class="o">.</span><span class="n">expect</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">t</span><span class="o">*</span><span class="n">omega</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">,</span> <span class="n">result</span><span class="o">.</span><span class="n">expect</span><span class="p">[</span><span class="mi">1</span><span class="p">]);</span>
+</pre></div>
+
+
+<p><img alt="png" src="quantum_files/quantum_22_0.png"></p>
+<p>QuTip has Bloch sphere representation which is helpful for representing 3d representation</p>
+<div class="highlight"><pre><span></span><span class="n">sx</span><span class="p">,</span> <span class="n">sy</span><span class="p">,</span> <span class="n">sz</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">expect</span>
+<span class="n">b</span> <span class="o">=</span> <span class="n">Bloch</span><span class="p">()</span>
+<span class="n">b</span><span class="o">.</span><span class="n">add_points</span><span class="p">([</span><span class="n">sx</span><span class="p">,</span><span class="n">sy</span><span class="p">,</span><span class="n">sz</span><span class="p">])</span>
+<span class="n">b</span><span class="o">.</span><span class="n">add_vectors</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">])</span>
+<span class="n">b</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+
+
+<p><img alt="png" src="quantum_files/quantum_24_0.png"></p>
+<div class="highlight"><pre><span></span><span class="n">H</span> <span class="o">=</span> <span class="n">sigmaz</span><span class="p">()</span> <span class="o">+</span> <span class="mf">0.3</span> <span class="o">*</span> <span class="n">sigmay</span><span class="p">()</span>
+<span class="n">e_ops</span> <span class="o">=</span> <span class="p">[</span><span class="n">sigmax</span><span class="p">(),</span> <span class="n">sigmay</span><span class="p">(),</span> <span class="n">sigmaz</span><span class="p">()]</span>
+<span class="n">times</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>
+<span class="n">psi0</span> <span class="o">=</span> <span class="p">(</span><span class="n">basis</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="o">+</span> <span class="n">basis</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span><span class="o">.</span><span class="n">unit</span><span class="p">()</span>
+<span class="n">result</span> <span class="o">=</span> <span class="n">mesolve</span><span class="p">(</span><span class="n">H</span><span class="p">,</span> <span class="n">psi0</span><span class="p">,</span> <span class="n">times</span><span class="p">,</span> <span class="p">[],</span> <span class="n">e_ops</span><span class="p">)</span>
+
+<span class="n">b</span> <span class="o">=</span> <span class="n">Bloch</span><span class="p">()</span>
+<span class="n">b</span><span class="o">.</span><span class="n">add_vectors</span><span class="p">(</span><span class="n">expect</span><span class="p">(</span><span class="n">H</span><span class="o">.</span><span class="n">unit</span><span class="p">(),</span> <span class="n">e_ops</span><span class="p">))</span>
+<span class="n">b</span><span class="o">.</span><span class="n">add_points</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">expect</span><span class="p">,</span> <span class="n">meth</span><span class="o">=</span><span class="s1">&#39;l&#39;</span><span class="p">)</span>
+<span class="n">b</span><span class="o">.</span><span class="n">make_sphere</span><span class="p">()</span>
+</pre></div>
+
+
+<p><img alt="png" src="quantum_files/quantum_25_0.png"></p>
+<p>And for plotting wigner funtions:</p>
+<div class="highlight"><pre><span></span><span class="n">plot_wigner</span><span class="p">(</span><span class="n">coherent</span><span class="p">(</span><span class="mi">25</span><span class="p">,</span><span class="o">-</span><span class="mi">2</span><span class="o">+</span><span class="mi">2</span><span class="n">j</span><span class="p">)</span><span class="o">+</span><span class="n">coherent</span><span class="p">(</span><span class="mi">25</span><span class="p">,</span><span class="mi">2</span><span class="o">-</span><span class="mi">2</span><span class="n">j</span><span class="p">));</span>
+</pre></div>
+
+
+<p><img alt="png" src="quantum_files/quantum_27_0.png"></p>
+<p>OK great but how does this stuff help us in the real world? Well now we get to quantum computing. <a href="https://en.wikipedia.org/wiki/Qubit">Qubit's</a> are the building block of quantum circuits, what will become the QPU (like CPU). In Qubit you can lay out the circuits and show how it will transform matrices.</p>
+<div class="highlight"><pre><span></span><span class="n">N</span><span class="o">=</span><span class="mi">2</span>
+<span class="n">qc</span> <span class="o">=</span> <span class="n">QubitCircuit</span><span class="p">(</span><span class="n">N</span><span class="p">)</span>
+<span class="c1"># Phase shift gates</span>
+<span class="n">qc</span><span class="o">.</span><span class="n">add_gate</span><span class="p">(</span><span class="s2">&quot;RY&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">arg_value</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span><span class="n">arg_label</span><span class="o">=</span><span class="sa">r</span><span class="s2">&quot;\pi/2&quot;</span><span class="p">)</span>
+<span class="n">qc</span><span class="o">.</span><span class="n">add_gate</span><span class="p">(</span><span class="s2">&quot;SWAP&quot;</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">],</span> <span class="n">arg_value</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span><span class="n">arg_label</span><span class="o">=</span><span class="s1">&#39;swap&#39;</span><span class="p">)</span>
+<span class="n">bg_gates</span> <span class="o">=</span><span class="n">gate_sequence_product</span><span class="p">(</span><span class="n">qc</span><span class="o">.</span><span class="n">propagators</span><span class="p">())</span>
+<span class="n">qc</span><span class="o">.</span><span class="n">svg</span>
+</pre></div>
+
+
+<p><img alt="svg" src="quantum_files/quantum_29_0.svg"></p>
+<div class="highlight"><pre><span></span><span class="n">initial</span> <span class="o">=</span> <span class="n">tensor</span><span class="p">(</span><span class="n">basis</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">0</span><span class="p">),</span><span class="n">basis</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">0</span><span class="p">))</span>
+<span class="n">initial</span><span class="o">*</span><span class="n">initial</span><span class="o">.</span><span class="n">dag</span><span class="p">()</span>
+</pre></div>
+
+
+<p><img alt="png" src="quantum_files/latex_10.png"></p>
+<div class="highlight"><pre><span></span><span class="n">final</span> <span class="o">=</span> <span class="n">bg_gates</span><span class="o">*</span><span class="n">initial</span>
+<span class="n">final</span><span class="o">*</span><span class="n">final</span><span class="o">.</span><span class="n">dag</span><span class="p">()</span>
+</pre></div>
+
+
+<p><img alt="png" src="quantum_files/latex_11.png"></p>
+<p>Entagling Qubits is done with <a href="https://en.wikipedia.org/wiki/Quantum_logic_gate">Hadamard gates</a></p>
+<div class="highlight"><pre><span></span><span class="n">bellgen</span><span class="o">=</span><span class="n">QubitCircuit</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+<span class="n">bellgen</span><span class="o">.</span><span class="n">add_gate</span><span class="p">(</span><span class="s2">&quot;SNOT&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="n">bellgen</span><span class="o">.</span><span class="n">add_gate</span><span class="p">(</span><span class="s2">&quot;CNOT&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="n">bg_gates</span> <span class="o">=</span><span class="n">gate_sequence_product</span><span class="p">(</span><span class="n">bellgen</span><span class="o">.</span><span class="n">propagators</span><span class="p">())</span>
+<span class="n">initial</span> <span class="o">=</span> <span class="n">tensor</span><span class="p">(</span><span class="n">basis</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">0</span><span class="p">),</span><span class="n">basis</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">0</span><span class="p">))</span>
+<span class="n">final</span> <span class="o">=</span> <span class="n">bg_gates</span><span class="o">*</span><span class="n">initial</span>
+<span class="n">bellgen</span><span class="o">.</span><span class="n">svg</span>
+</pre></div>
+
+
+<p><img alt="svg" src="quantum_files/quantum_33_0.svg"></p>
+<div class="highlight"><pre><span></span><span class="n">initial</span><span class="o">*</span><span class="n">initial</span><span class="o">.</span><span class="n">dag</span><span class="p">()</span>
+</pre></div>
+
+
+<p><img alt="png" src="quantum_files/latex_12.png"></p>
+<div class="highlight"><pre><span></span><span class="n">final</span><span class="o">*</span><span class="n">final</span><span class="o">.</span><span class="n">dag</span><span class="p">()</span>
+</pre></div>
+
+
+<p><img alt="png" src="quantum_files/latex_13.png"></p>
+<p>With these tools you can start to program in quantum algorithms, the matrix lends itself to <a href="https://en.wikipedia.org/wiki/Quantum_walk">quantum walks</a>. </p>
+<div class="highlight"><pre><span></span><span class="c1"># credit https://github.com/deot95/QuantumWalks/blob/master/QRW.ipynb</span>
+<span class="c1">## Declaration of unitary evolution operators</span>
+<span class="n">N</span> <span class="o">=</span> <span class="mi">500</span>
+<span class="n">psisim</span> <span class="o">=</span> <span class="p">(</span><span class="n">tensor</span><span class="p">(</span><span class="n">basis</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">),</span><span class="n">basis</span><span class="p">(</span><span class="n">N</span><span class="p">,</span><span class="nb">int</span><span class="p">(</span><span class="n">N</span><span class="o">/</span><span class="mi">2</span><span class="o">-</span><span class="mi">3</span><span class="p">)))</span> <span class="o">+</span> <span class="mi">1</span><span class="n">j</span><span class="o">*</span><span class="n">tensor</span><span class="p">(</span><span class="n">basis</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">0</span><span class="p">),</span><span class="n">basis</span><span class="p">(</span><span class="n">N</span><span class="p">,</span><span class="nb">int</span><span class="p">(</span><span class="n">N</span><span class="o">/</span><span class="mi">2</span><span class="o">-</span><span class="mi">3</span><span class="p">))))</span><span class="o">.</span><span class="n">unit</span><span class="p">()</span>
+<span class="c1">## Hadamard Operator</span>
+<span class="n">H</span> <span class="o">=</span> <span class="n">hadamard_transform</span><span class="p">(</span><span class="n">N</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">I</span> <span class="o">=</span> <span class="n">qeye</span><span class="p">(</span><span class="n">N</span><span class="o">=</span><span class="n">N</span><span class="p">)</span>
+<span class="c1">## Coin Operator</span>
+<span class="n">C</span> <span class="o">=</span> <span class="n">tensor</span><span class="p">(</span><span class="n">H</span><span class="p">,</span><span class="n">I</span><span class="p">)</span>
+<span class="c1">## Conditional Displacement Operator</span>
+<span class="n">S0</span> <span class="o">=</span> <span class="n">Qobj</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">N</span><span class="p">,</span><span class="n">N</span><span class="p">)))</span>
+<span class="n">S1</span> <span class="o">=</span> <span class="n">Qobj</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">N</span><span class="p">,</span><span class="n">N</span><span class="p">)))</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+    <span class="n">S0</span><span class="o">+=</span> <span class="n">basis</span><span class="p">(</span><span class="n">N</span><span class="p">,</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="n">basis</span><span class="p">(</span><span class="n">N</span><span class="p">,</span><span class="n">i</span><span class="p">)</span><span class="o">.</span><span class="n">dag</span><span class="p">()</span>
+<span class="n">Sd</span>  <span class="o">=</span> <span class="n">tensor</span><span class="p">(</span><span class="n">basis</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="n">basis</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">dag</span><span class="p">(),</span><span class="n">S0</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">N</span><span class="p">):</span>
+    <span class="n">S1</span><span class="o">+=</span> <span class="n">basis</span><span class="p">(</span><span class="n">N</span><span class="p">,</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="n">basis</span><span class="p">(</span><span class="n">N</span><span class="p">,</span><span class="n">i</span><span class="p">)</span><span class="o">.</span><span class="n">dag</span><span class="p">()</span>
+<span class="n">Si</span>  <span class="o">=</span> <span class="n">tensor</span><span class="p">(</span><span class="n">basis</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span><span class="o">*</span><span class="n">basis</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">dag</span><span class="p">(),</span><span class="n">S1</span><span class="p">)</span>
+<span class="n">S</span> <span class="o">=</span> <span class="n">Sd</span> <span class="o">+</span> <span class="n">Si</span>
+
+<span class="c1">#quantum walk</span>
+<span class="k">def</span> <span class="nf">qw</span><span class="p">(</span><span class="n">coin</span><span class="p">,</span><span class="n">shift</span><span class="p">,</span><span class="n">psi_ini</span><span class="p">,</span><span class="n">steps</span><span class="p">):</span>
+    <span class="n">U</span> <span class="o">=</span> <span class="p">(</span><span class="n">S</span><span class="o">*</span><span class="n">C</span><span class="p">)</span><span class="o">**</span><span class="n">steps</span>
+    <span class="n">quantum</span> <span class="o">=</span> <span class="p">(((</span><span class="n">U</span><span class="o">*</span><span class="n">psi_ini</span><span class="p">)</span><span class="o">.</span><span class="n">unit</span><span class="p">())</span><span class="o">.</span><span class="n">ptrace</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span><span class="o">.</span><span class="n">diag</span><span class="p">()</span>
+    <span class="n">xq</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="o">*</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">quantum</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span><span class="p">),</span><span class="nb">len</span><span class="p">(</span><span class="n">quantum</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">xq</span><span class="p">,</span><span class="n">quantum</span><span class="p">)</span>
+
+<span class="c1">#classical walk</span>
+<span class="k">def</span> <span class="nf">ucrw</span><span class="p">(</span><span class="n">steps</span><span class="p">):</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="o">-</span><span class="p">(</span><span class="n">steps</span><span class="p">)</span> <span class="p">,</span> <span class="n">steps</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">classic</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">steps</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">+</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">mod</span><span class="p">(</span><span class="n">x</span><span class="o">+</span><span class="n">steps</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span><span class="o">==</span><span class="mi">0</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="mf">1.</span><span class="o">/</span><span class="p">(</span><span class="mi">2</span><span class="o">**</span><span class="n">steps</span><span class="p">))</span><span class="o">*</span><span class="n">scp</span><span class="o">.</span><span class="n">special</span><span class="o">.</span><span class="n">binom</span><span class="p">(</span><span class="n">steps</span><span class="p">,(</span><span class="n">x</span><span class="o">+</span><span class="n">steps</span><span class="p">)</span><span class="o">/</span><span class="mf">2.</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">classic</span><span class="p">)</span>
+
+<span class="n">steps</span> <span class="o">=</span> <span class="mi">200</span>
+<span class="n">xq</span><span class="p">,</span><span class="n">quantum</span><span class="o">=</span><span class="n">qw</span><span class="p">(</span><span class="n">C</span><span class="p">,</span><span class="n">S</span><span class="p">,</span><span class="n">psisim</span><span class="p">,</span><span class="n">steps</span><span class="p">)</span>
+<span class="n">x</span><span class="p">,</span><span class="n">classic</span><span class="o">=</span><span class="n">ucrw</span><span class="p">(</span><span class="n">steps</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">classic</span><span class="p">,</span><span class="n">label</span><span class="o">=</span><span class="s2">&quot;Classical Random Walk&quot;</span><span class="p">,</span><span class="n">alpha</span><span class="o">=</span><span class="mf">0.85</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">xq</span><span class="p">,</span><span class="n">quantum</span><span class="p">,</span><span class="n">label</span><span class="o">=</span><span class="s2">&quot;Quantum Walk&quot;</span><span class="p">,</span><span class="n">alpha</span><span class="o">=</span><span class="mf">0.85</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">();</span>
+</pre></div>
+
+
+<p><img alt="png" src="quantum_files/quantum_37_0.png"></p>
+<p>Further watching:</p>
+<p><a href="https://www.youtube.com/watch?v=6j3J-LC0cck">Quantum walks</a></p>
+<p><a href="https://www.youtube.com/watch?v=F_Riqjdh2oM&amp;t=4719s">Microsoft Quantum research</a></p>
+<p>IBM also has free accounts for testing limited quantum circuits <a href="https://quantum-computing.ibm.com/">here</a></p>
+    </div>
+</div>
+    </div>
+</body>
+</html>
